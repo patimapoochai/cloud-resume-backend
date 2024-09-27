@@ -9,6 +9,11 @@ jobs:
       id-token: write
       contents: read
     steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Build
+        run: |
+          ls
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
