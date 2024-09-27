@@ -13,7 +13,9 @@ jobs:
         uses: actions/checkout@v4
       - name: Build
         run: |
-          bash ./src/build.sh
+          cd out
+          bash ./build.sh
+          cd ..
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
