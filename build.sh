@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-mkdir ../out
+mkdir out
+cd src
 zip code.zip lambda_function.py
-rm ../out/*
-mv code.zip ../out/
+cd -
+mv src/code.zip out/
