@@ -36,6 +36,7 @@ data "aws_iam_policy_document" "terraform_create" {
     effect = "Allow"
     actions = [
       "dynamodb:CreateTable",
+      "dynamodb:DescribeTable",
     ]
     resources = [
       "*",
@@ -49,6 +50,7 @@ data "aws_iam_policy_document" "terraform_create" {
       "dynamodb:UpdateTimeToLive",
       "dynamodb:PutItem",
       "dynamodb:GetItem",
+      "dynamodb:DeleteItem",
     ]
     resources = [
       "*", # change this to specific table?
@@ -60,7 +62,10 @@ data "aws_iam_policy_document" "terraform_create" {
     effect = "Allow"
     actions = [
       "iam:CreateRole",
-      "iam:CreatePolicy"
+      "iam:CreatePolicy",
+      "iam:GetPolicy",
+      "iam:GetRole",
+      "iam:GetOpenIDConnectProvider",
     ]
     resources = [
       "*",
@@ -81,6 +86,7 @@ data "aws_iam_policy_document" "terraform_create" {
   statement {
     sid = "Route53"
     actions = [
+      "route53:ListResourceRecordSets",
       "route53:ChangeResourceRecordSets",
       "route53:ListHostedZones",
       "route53:GetHostedZone",
@@ -95,6 +101,7 @@ data "aws_iam_policy_document" "terraform_create" {
     sid = "S3BucketLevel"
     actions = [
       "s3:CreateBucket",
+      "s3:GetBucketPolicy",
     ]
     resources = [
       "*",
