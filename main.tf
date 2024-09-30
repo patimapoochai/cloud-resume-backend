@@ -22,6 +22,11 @@ provider "aws" {
   profile = var.aws_profile
 }
 
+module "github_actions_terraform" {
+  source    = "./modules/services/terraform"
+  namespace = "1"
+}
+
 module "terraform-remote-state" {
   source                   = "./modules/services/terraform-state"
   s3_state_bucket_name     = "cloud-resume-pat-state"

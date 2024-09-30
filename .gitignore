@@ -36,4 +36,7 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# Build folder
 out
+# local debug folder
+debug-stuff
