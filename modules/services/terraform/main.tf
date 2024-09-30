@@ -10,6 +10,20 @@ data "aws_iam_policy_document" "terraform_create" {
     effect = "Allow"
     actions = [
       "acm:ListCertificates",
+      "acm:DescribeCertificate",
+      "acm:GetCertificate",
+    ]
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    sid = "APIGateway"
+    actions = [
+      "apigateway:GET",
+      "apigateway:PUT",
+      "apigateway:PATCH",
     ]
     resources = [
       "*",
@@ -52,18 +66,6 @@ data "aws_iam_policy_document" "terraform_create" {
   }
 
   statement {
-    sid = "APIGateway"
-    actions = [
-      "apigateway:GET",
-      "apigateway:PUT",
-      "apigateway:PATCH",
-    ]
-    resources = [
-      "*",
-    ]
-  }
-
-  statement {
     sid = "Lambda"
     actions = [
       "lambda:CreateFunction",
@@ -79,6 +81,8 @@ data "aws_iam_policy_document" "terraform_create" {
     actions = [
       "route53:ChangeResourceRecordSets",
       "route53:ListHostedZones",
+      "route53:GetHostedZone",
+      "route53:ListTagsForResource",
     ]
     resources = [
       "*", # change this to only the specific hosted zone?
@@ -174,10 +178,6 @@ data "aws_iam_policy_document" "github_actions_oidc_access" {
       values   = ["sts.amazonaws.com"]
     }
   }
-}
-
-output "principals" {
-  value = "arn:aws:iam::${data.aws_caller_identity.current.account_id}::${local.github_oidc_url}"
 }
 
 resource "aws_iam_role" "github_actions_terraform" {
