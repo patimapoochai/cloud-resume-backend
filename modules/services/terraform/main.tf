@@ -58,7 +58,6 @@ data "aws_iam_policy_document" "terraform_create" {
     effect = "Allow"
     actions = [
       "iam:CreateRole",
-      "iam:CreateServiceLinkedRole",
       "iam:CreatePolicy"
     ]
     resources = [
