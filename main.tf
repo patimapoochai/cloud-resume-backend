@@ -6,13 +6,13 @@ terraform {
     }
   }
 
-  # backend "s3" {
-  #   bucket         = "cloud-resume-pat-state"
-  #   key            = "global/s3/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   dynamodb_table = "cloud-resume-terraform-lock"
-  #   encrypt        = true
-  # }
+  backend "s3" {
+    bucket         = "cloud-resume-pat-state"
+    key            = "global/s3/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "cloud-resume-terraform-lock"
+    encrypt        = true
+  }
 
   required_version = ">= 1.9.4"
 }
@@ -25,10 +25,7 @@ provider "aws" {
 module "github_actions_terraform" {
   source    = "./modules/services/terraform"
   namespace = "1"
-}
 
-module "terraform-remote-state" {
-  source                   = "./modules/services/terraform-state"
   s3_state_bucket_name     = "cloud-resume-pat-state"
   dynamodb_lock_table_name = "cloud-resume-terraform-lock"
 }
