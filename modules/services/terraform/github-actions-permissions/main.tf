@@ -46,7 +46,9 @@ data "aws_iam_policy_document" "terraform_create" {
     sid    = "DynamoDBRecordLevel"
     effect = "Allow"
     actions = [
-      "dynamodb:UpdateTimeToLive"
+      "dynamodb:UpdateTimeToLive",
+      "dynamodb:PutItem",
+      "dynamodb:GetItem",
     ]
     resources = [
       "*", # change this to specific table?
