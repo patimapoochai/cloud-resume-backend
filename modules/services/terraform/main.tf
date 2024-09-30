@@ -12,6 +12,7 @@ data "aws_iam_policy_document" "terraform_create" {
       "acm:ListCertificates",
       "acm:DescribeCertificate",
       "acm:GetCertificate",
+      "acm:ListTagsForCertificate",
     ]
     resources = [
       "*",
