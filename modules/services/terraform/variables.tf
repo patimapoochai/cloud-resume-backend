@@ -12,3 +12,23 @@ variable "dynamodb_lock_table_name" {
   description = "dynamodb table to store state file lock"
   type        = string
 }
+
+variable "cache_table_arn" {
+  type = string
+}
+
+variable "lambda_role_arn" {
+  type = string
+}
+
+variable "stat_table_arn" {
+  type = string
+}
+
+variable "lambda_function_arn" {
+  type = string
+}
+
+variable "lambda_role_policy_arn" {
+  type = string
+}

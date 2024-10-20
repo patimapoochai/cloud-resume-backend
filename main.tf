@@ -6,13 +6,13 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket         = "cloud-resume-pat-state"
-    key            = "global/s3/terraform.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "cloud-resume-terraform-lock"
-    encrypt        = true
-  }
+  # backend "s3" {
+  #   bucket         = "cloud-resume-pat-state"
+  #   key            = "global/s3/terraform.tfstate"
+  #   region         = "us-east-1"
+  #   dynamodb_table = "cloud-resume-terraform-lock"
+  #   encrypt        = true
+  # }
 
   required_version = ">= 1.9.4"
 }
@@ -28,6 +28,13 @@ module "github_actions_terraform" {
 
   s3_state_bucket_name     = "cloud-resume-pat-state"
   dynamodb_lock_table_name = "cloud-resume-terraform-lock"
+
+  cache_table_arn = module.dynamodb-tables.cache_table_arn
+  stat_table_arn  = module.dynamodb-tables.stat_table_arn
+
+  lambda_role_arn        = module.lambda-function.lambda_role_arn
+  lambda_function_arn    = module.lambda-function.lambda_function_arn
+  lambda_role_policy_arn = module.lambda-function.lambda_role_policy_arn
 }
 
 module "route53" {

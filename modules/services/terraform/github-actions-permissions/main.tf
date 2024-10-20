@@ -2,139 +2,321 @@ locals {
   github_oidc_url = "token.actions.githubusercontent.com"
 }
 
-data "aws_iam_policy_document" "terraform_create" {
+data "aws_caller_identity" "current" {}
+
+data "aws_iam_policy_document" "terraform_create" { # cycle here?
   version = "2012-10-17"
 
   statement {
-    sid    = "ACM"
+    sid    = "General"
     effect = "Allow"
     actions = [
-      "acm:ListCertificates",
+      "sts:GetCallerIdentity",
+      "route53:ListHostedZones",
+      "acm:ListCertificates"
+    ]
+    resources = [
+      "*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "route53:GetHostedZone"
+    ]
+    resources = [
+      var.hosted_zone_arn
+    ]
+  }
+
+  statement {
+    actions = [
       "acm:DescribeCertificate",
-      "acm:GetCertificate",
-      "acm:ListTagsForCertificate",
+      "acm:GetCertificate"
     ]
     resources = [
-      "*",
+      var.patimapoochai_domain_certificate_arn
     ]
   }
 
   statement {
-    sid = "APIGateway"
     actions = [
-      "apigateway:GET",
-      "apigateway:PUT",
-      "apigateway:PATCH",
+      "route53:ListTagsForResource"
     ]
     resources = [
-      "*",
+      "arn:aws:route53:::healthcheck/*",
+      "arn:aws:route53:::hostedzone/*"
     ]
   }
 
   statement {
-    sid    = "DynamoDBTableLevel"
-    effect = "Allow"
+    actions = [
+      "acm:ListTagsForCertificate"
+    ]
+    resources = [
+      # "arn:aws:acm:us-east-1:879381244858:certificate/*"
+      "arn:aws:acm:${var.region}:${data.aws_caller_identity.current.account_id}:certificate/*"
+    ]
+  }
+
+  statement {
+    sid = "CacheTable"
     actions = [
       "dynamodb:CreateTable",
       "dynamodb:DescribeTable",
-    ]
-    resources = [
-      "*",
-    ]
-  }
-
-  statement {
-    sid    = "DynamoDBRecordLevel"
-    effect = "Allow"
-    actions = [
       "dynamodb:UpdateTimeToLive",
-      "dynamodb:PutItem",
-      "dynamodb:GetItem",
-      "dynamodb:DeleteItem",
+      "dynamodb:DescribeTimeToLive",
+      "dynamodb:DescribeContinuousBackups",
+      "dynamodb:ListTagsOfResource"
     ]
     resources = [
-      "*", # change this to specific table?
+      var.cache_table_arn
     ]
   }
 
   statement {
-    sid    = "IAMCreate"
-    effect = "Allow"
+    sid = "TerraformLockTable"
     actions = [
-      "iam:CreateRole",
-      "iam:CreatePolicy",
-      "iam:GetPolicy",
-      "iam:GetRole",
-      "iam:GetOpenIDConnectProvider",
+      "dynamodb:CreateTable",
+      "dynamodb:DescribeTable",
+      "dynamodb:DescribeContinuousBackups",
+      "dynamodb:DescribeTimeToLive",
+      "dynamodb:ListTagsOfResource"
     ]
     resources = [
-      "*",
+      var.terraform_lock_table_arn
     ]
   }
 
   statement {
-    sid = "Lambda"
     actions = [
-      "lambda:CreateFunction",
-      "lambda:AddPermission",
+      "apigateway:POST"
     ]
     resources = [
-      "*",
+      "arn:aws:apigateway:${var.region}::/domainnames",
+      "arn:aws:apigateway:${var.region}::/restapis"
     ]
   }
 
   statement {
-    sid = "Route53"
-    actions = [
-      "route53:ListResourceRecordSets",
-      "route53:ChangeResourceRecordSets",
-      "route53:ListHostedZones",
-      "route53:GetHostedZone",
-      "route53:ListTagsForResource",
-    ]
-    resources = [
-      "*", # change this to only the specific hosted zone?
-    ]
-  }
-
-  statement {
-    sid = "S3BucketLevel"
-    actions = [
-      "s3:CreateBucket",
-      "s3:GetBucketPolicy",
-    ]
-    resources = [
-      "*",
-    ]
-  }
-
-  statement {
-    sid = "S3ObjectLevel"
-    actions = [
-      "s3:PutBucketVersioning",
-      "s3:PutBucketPublicAccessBlock",
-      "s3:PutEncryptionConfiguration",
-    ]
-    resources = [
-      "*", # change this to specific bucket
-    ]
-  }
-
-  statement {
-    sid = "TerraformS3BackendObjectLevel"
     actions = [
       "s3:ListBucket",
-      "s3:GetObject",
-      "s3:PutObject"
+      "s3:CreateBucket",
+      "s3:GetBucketPolicy",
+      "s3:GetBucketAcl",
+      "s3:GetBucketCORS",
+      "s3:GetBucketWebsite",
+      "s3:GetBucketVersioning",
+      "s3:GetAccelerateConfiguration",
+      "s3:GetBucketRequestPayment",
+      "s3:GetBucketLogging",
+      "s3:GetLifecycleConfiguration",
+      "s3:GetReplicationConfiguration",
+      "s3:GetEncryptionConfiguration",
+      "s3:GetBucketObjectLockConfiguration",
+      "s3:GetBucketTagging",
+      "s3:PutEncryptionConfiguration",
+      "s3:PutBucketPublicAccessBlock",
+      "s3:PutBucketVersioning",
+      "s3:GetBucketPublicAccessBlock"
     ]
     resources = [
-      "*",
-      # var.terraform_s3_backend_bucket
+      var.terraform_s3_state_arn
+      #var.terraform_s3_cloud_resume_pat_state
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:CreateOpenIDConnectProvider"
+    ]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:CreateRole",
+      "iam:GetRole",
+      "iam:ListRolePolicies",
+      "iam:ListAttachedRolePolicies",
+      "iam:AttachRolePolicy"
+    ]
+    resources = [
+      # "arn:aws:iam::879381244858:role/github_actions_terraform_role_1"
+      aws_iam_role.github_actions_terraform.arn
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:CreateRole",
+      "iam:GetRole",
+      "iam:ListRolePolicies",
+      "iam:ListAttachedRolePolicies",
+      "iam:PassRole",
+      "iam:AttachRolePolicy"
+    ]
+    resources = [
+      var.lambda_role_arn
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:CreatePolicy",
+      "iam:GetPolicy",
+      "iam:GetPolicyVersion"
+    ]
+    resources = [
+      aws_iam_policy.github_oidc_safety.arn
+      #var.GithubOIDCSafety_policy_arn"aws_iam_policy" "github_oidc_safety"
+    ]
+  }
+
+  statement {
+    actions = [
+      "dynamodb:CreateTable",
+      "dynamodb:DescribeTable",
+      "dynamodb:DescribeContinuousBackups",
+      "dynamodb:DescribeTimeToLive",
+      "dynamodb:ListTagsOfResource"
+    ]
+    resources = [
+      var.stat_table_arn
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:GetOpenIDConnectProvider"
+    ]
+    resources = [
+      aws_iam_openid_connect_provider.github.arn
+      #var.OIDC_provider_tokens_actions_githubusercontent "aws_iam_openid_connect_provider" "github"
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:CreatePolicy",
+      "iam:GetPolicy",
+      "iam:GetPolicyVersion"
+    ]
+    resources = [
+      aws_iam_policy.github_actions_terraform.arn
+    ]
+  }
+
+  statement {
+    actions = [
+      "apigateway:GET"
+    ]
+    resources = [
+      "arn:aws:apigateway:${var.region}::/domainnames/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "lambda:CreateFunction",
+      "lambda:GetFunction",
+      "lambda:ListVersionsByFunction",
+      "lambda:GetFunctionCodeSigningConfig",
+      "lambda:AddPermission",
+      "lambda:GetPolicy"
+    ]
+    resources = [
+      var.lambda_function_arn
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:CreatePolicy",
+      "iam:GetPolicy",
+      "iam:GetPolicyVersion"
+    ]
+    resources = [
+      var.lambda_role_policy_arn
+    ]
+  }
+
+  statement {
+    actions = [
+      "apigateway:GET"
+    ]
+    resources = [
+      "arn:aws:apigateway:${var.region}::/apis/*/integrations/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "apigateway:POST"
+    ]
+    resources = [
+      "arn:aws:apigateway:${var.region}::/apis/*/deployments"
+    ]
+  }
+
+  statement {
+    actions = [
+      "apigateway:GET"
+    ]
+    resources = [
+      "arn:aws:apigateway:${var.region}::/apis/*/deployments/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "apigateway:POST"
+    ]
+    resources = [
+      "arn:aws:apigateway:${var.region}::/apis/*/stages"
+    ]
+  }
+
+  statement {
+    actions = [
+      "apigateway:GET"
+    ]
+    resources = [
+      "arn:aws:apigateway:${var.region}::/apis/*/stages/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "apigateway:POST"
+    ]
+    resources = [
+      "arn:aws:apigateway:${var.region}::/usageplans"
+    ]
+  }
+
+  # statement {
+  #   actions = [
+  #     "route53:GetChange"
+  #   ]
+  #   resources = [
+  #     "arn:aws:route53:::change/C06843121UC52O6A6QE4V" # WTF is this?
+  #   ]
+  # }
+
+  statement {
+    actions = [
+      "route53:ListResourceRecordSets"
+    ]
+    resources = [
+      "arn:aws:route53:::hostedzone/*"
     ]
   }
 }
 
-resource "aws_iam_policy" "github_actions_terraform" {
+resource "aws_iam_policy" "github_actions_terraform" { # cycle here
   name        = "GithubActionsTerraformPermissions_${var.namespace}"
   description = "Permissions for the Github actions service account for cloud resume challenge"
 
@@ -171,8 +353,6 @@ resource "aws_iam_policy" "github_oidc_safety" {
 
   policy = data.aws_iam_policy_document.oidc_safety.json
 }
-
-data "aws_caller_identity" "current" {}
 
 data "aws_iam_policy_document" "github_actions_oidc_access" {
   version = "2012-10-17"
