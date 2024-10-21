@@ -144,9 +144,13 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "iam:AttachRolePolicy"
     ]
     resources = [
-      # "arn:aws:iam::879381244858:role/github_actions_terraform_role_1"
-      aws_iam_role.github_actions_terraform.arn
+      "*"
     ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/Project"
+      values   = ["Cloud-Resume-Project"]
+    }
   }
 
   statement {
@@ -205,8 +209,13 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "iam:GetPolicyVersion"
     ]
     resources = [
-      aws_iam_policy.github_actions_terraform.arn
+      "*"
     ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/Project"
+      values   = ["Cloud-Resume-Project"]
+    }
   }
 
   statement {

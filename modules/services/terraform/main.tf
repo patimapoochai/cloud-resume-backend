@@ -1,9 +1,9 @@
 data "aws_route53_zone" "patimapoochai_domain" {
-  name = "patimapoochai_domain.net." # this should be variable
+  name = "patimapoochai.net." # this should be variable
 }
 
 data "aws_acm_certificate" "patimapoochai_domain" {
-  domain   = "patimapoochai_domain.net." # this should also be variable
+  domain   = "patimapoochai.net" # this should also be variable
   statuses = ["ISSUED"]
 }
 
