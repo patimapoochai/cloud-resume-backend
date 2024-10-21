@@ -317,6 +317,18 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
     ]
   }
 
+  statement {
+    actions = [
+      "dynamodb:CreateTable",
+    ]
+    resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/Project"
+      values   = ["Cloud-Resume-Project"]
+    }
+  }
+
   # statement {
   #   actions = [
   #     "route53:GetChange"
