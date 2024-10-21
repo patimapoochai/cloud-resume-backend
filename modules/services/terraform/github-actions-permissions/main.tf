@@ -76,17 +76,32 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
   }
 
   statement {
-    sid = "TerraformLockTable"
+    sid = "CreateTerraformLockTable"
     actions = [
-      "dynamodb:CreateTable",
-      "dynamodb:DescribeTable",
-      "dynamodb:DescribeContinuousBackups",
-      "dynamodb:DescribeTimeToLive",
-      "dynamodb:ListTagsOfResource",
-      "dynamodb:TagResource"
+      "dynamodb:CreateTable"
     ]
     resources = [
-      var.terraform_lock_table_arn
+      "*"
+    ]
+  }
+
+  statement {
+    sid = "TerraformLockTableItemAccess"
+    actions = [
+      "dynamodb:*",
+    ]
+    resources = [
+      "${var.terraform_lock_table_arn}/*"
+    ]
+  }
+
+  statement {
+    sid = "TerraformLockTableObjectAccess"
+    actions = [
+      "s3:*"
+    ]
+    resources = [
+      "${var.terraform_lock_table_arn}/*"
     ]
   }
 

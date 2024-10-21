@@ -25,7 +25,7 @@ module "github_actions_permissions" {
   lambda_role_policy_arn = var.lambda_role_policy_arn
 
   terraform_s3_state_arn   = module.terraform-s3-remote-state.state_bucket_arn
-  terraform_lock_table_arn = module.terraform-s3-remote-state.state_bucket_arn
+  terraform_lock_table_arn = module.terraform-s3-remote-state.dynamodb_lock_table_arn
 }
 
 # call terraform-remote-state module
