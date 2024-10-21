@@ -91,7 +91,7 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "dynamodb:*",
     ]
     resources = [
-      "${var.terraform_lock_table_arn}/*"
+      "${var.terraform_lock_table_arn}"
     ]
   }
 
