@@ -95,8 +95,9 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "apigateway:*"
     ]
     resources = [
-      "arn:aws:apigateway:${var.region}::/domainnames",
-      "arn:aws:apigateway:${var.region}::/restapis"
+      "*"
+      #"arn:aws:apigateway:${var.region}::/domainnames",
+      #"arn:aws:apigateway:${var.region}::/restapis"
     ]
     condition {
       test     = "StringEquals"
@@ -180,7 +181,8 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
     actions = [
       "iam:CreatePolicy",
       "iam:GetPolicy",
-      "iam:GetPolicyVersion"
+      "iam:GetPolicyVersion",
+      "iam:TagPolicy"
     ]
     resources = [
       aws_iam_policy.github_oidc_safety.arn
@@ -304,7 +306,7 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "apigateway:GET"
     ]
     resources = [
-      "arn:aws:apigateway:${var.region}::/apis/*/stages/*"
+      "arn:aws:apigateway:${var.region}::/apis/*/stages"
     ]
   }
 

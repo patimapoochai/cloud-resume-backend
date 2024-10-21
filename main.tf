@@ -5,14 +5,20 @@ terraform {
       version = "~> 5.67"
     }
   }
-
-  # backend "s3" {
-  #   bucket         = "cloud-resume-pat-state"
-  #   key            = "global/s3/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   dynamodb_table = "cloud-resume-terraform-lock"
-  #   encrypt        = true
-  # }
+  # s3 backend bootstrap instructions
+  # 1. comment backend "s3" block
+  # 2. apply fresh terraform configuration
+  # 3. uncomment backend "s3" block
+  # 4. (development) export AWS_PROFILE=***
+  # 5. run terraform init
+  # s3 backend unboostrap is reverse of above instructions
+  backend "s3" {
+    bucket         = "cloud-resume-pat-state"
+    key            = "global/s3/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "cloud-resume-terraform-lock"
+    encrypt        = true
+  }
 
   required_version = ">= 1.9.4"
 }
