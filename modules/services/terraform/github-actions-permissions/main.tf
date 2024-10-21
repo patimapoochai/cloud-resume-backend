@@ -262,7 +262,8 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "lambda:ListVersionsByFunction",
       "lambda:GetFunctionCodeSigningConfig",
       "lambda:AddPermission",
-      "lambda:GetPolicy"
+      "lambda:GetPolicy",
+      "lambda:TagResource"
     ]
     resources = [
       var.lambda_function_arn
