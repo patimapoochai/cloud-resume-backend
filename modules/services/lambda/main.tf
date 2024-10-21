@@ -73,6 +73,10 @@ resource "aws_lambda_function" "lambda_function" {
   handler  = "lambda_function.lambda_handler"
   runtime  = "python3.12"
   filename = var.code_filename
+
+  tags = {
+    TestTag = "Active"
+  }
 }
 
 resource "aws_lambda_permission" "apigw_lambda" {
