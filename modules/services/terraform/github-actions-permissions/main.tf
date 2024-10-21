@@ -96,12 +96,12 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
   }
 
   statement {
-    sid = "TerraformLockTableObjectAccess"
+    sid = "TerraformLockStateBucketObjectAccess"
     actions = [
       "s3:*"
     ]
     resources = [
-      "${var.terraform_lock_table_arn}/*"
+      "${var.terraform_s3_state_arn}/*"
     ]
   }
 
