@@ -67,7 +67,8 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "dynamodb:UpdateTimeToLive",
       "dynamodb:DescribeTimeToLive",
       "dynamodb:DescribeContinuousBackups",
-      "dynamodb:ListTagsOfResource"
+      "dynamodb:ListTagsOfResource",
+      "dynamodb:TagResource"
     ]
     resources = [
       var.cache_table_arn
@@ -81,7 +82,8 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "dynamodb:DescribeTable",
       "dynamodb:DescribeContinuousBackups",
       "dynamodb:DescribeTimeToLive",
-      "dynamodb:ListTagsOfResource"
+      "dynamodb:ListTagsOfResource",
+      "dynamodb:TagResource"
     ]
     resources = [
       var.terraform_lock_table_arn
@@ -90,12 +92,17 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "apigateway:POST"
+      "apigateway:*"
     ]
     resources = [
       "arn:aws:apigateway:${var.region}::/domainnames",
       "arn:aws:apigateway:${var.region}::/restapis"
     ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/Project"
+      values   = ["Cloud-Resume-Project"]
+    }
   }
 
   statement {
@@ -141,10 +148,11 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "iam:GetRole",
       "iam:ListRolePolicies",
       "iam:ListAttachedRolePolicies",
-      "iam:AttachRolePolicy"
+      "iam:AttachRolePolicy",
+      "iam:TagRole"
     ]
     resources = [
-      "*"
+      "*" # was aws_iam_role.github_actions_terraform
     ]
     condition {
       test     = "StringEquals"
@@ -160,7 +168,8 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "iam:ListRolePolicies",
       "iam:ListAttachedRolePolicies",
       "iam:PassRole",
-      "iam:AttachRolePolicy"
+      "iam:AttachRolePolicy",
+      "iam:TagRole"
     ]
     resources = [
       var.lambda_role_arn
@@ -185,7 +194,8 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "dynamodb:DescribeTable",
       "dynamodb:DescribeContinuousBackups",
       "dynamodb:DescribeTimeToLive",
-      "dynamodb:ListTagsOfResource"
+      "dynamodb:ListTagsOfResource",
+      "dynamodb:TagResource"
     ]
     resources = [
       var.stat_table_arn
@@ -194,7 +204,8 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "iam:GetOpenIDConnectProvider"
+      "iam:GetOpenIDConnectProvider",
+      "iam:TagOpenIDConnectProvider"
     ]
     resources = [
       aws_iam_openid_connect_provider.github.arn
@@ -209,7 +220,7 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "iam:GetPolicyVersion"
     ]
     resources = [
-      "*"
+      "*" # was aws_iam_role.github_actions_terraform 
     ]
     condition {
       test     = "StringEquals"
