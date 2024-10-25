@@ -28,7 +28,7 @@ provider "aws" {
   profile = var.aws_profile
   default_tags {
     tags = {
-      Project = "Cloud-Resume-Project"
+      Project = "Cloud-Resume-Backend"
     }
   }
 }
