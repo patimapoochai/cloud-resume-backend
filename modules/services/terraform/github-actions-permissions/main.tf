@@ -342,6 +342,20 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "arn:aws:route53:::hostedzone/*"
     ]
   }
+
+  statement {
+    actions = [
+      "logs:*"
+    ]
+    resources = [
+      "*"
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/Project"
+      values   = ["Cloud-Resume-Backend"]
+    }
+  }
 }
 
 resource "aws_iam_policy" "github_actions_terraform" { # cycle here
