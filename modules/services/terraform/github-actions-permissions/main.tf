@@ -345,10 +345,10 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "logs:*"
+      "cloudwatch:*"
     ]
     resources = [
-      "*"
+      "arn:aws:logs:${var.region}:*"
     ]
     condition {
       test     = "StringEquals"
