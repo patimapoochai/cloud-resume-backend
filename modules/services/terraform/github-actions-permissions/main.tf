@@ -123,25 +123,7 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "s3:ListBucket",
-      "s3:CreateBucket",
-      "s3:GetBucketPolicy",
-      "s3:GetBucketAcl",
-      "s3:GetBucketCORS",
-      "s3:GetBucketWebsite",
-      "s3:GetBucketVersioning",
-      "s3:GetAccelerateConfiguration",
-      "s3:GetBucketRequestPayment",
-      "s3:GetBucketLogging",
-      "s3:GetLifecycleConfiguration",
-      "s3:GetReplicationConfiguration",
-      "s3:GetEncryptionConfiguration",
-      "s3:GetBucketObjectLockConfiguration",
-      "s3:GetBucketTagging",
-      "s3:PutEncryptionConfiguration",
-      "s3:PutBucketPublicAccessBlock",
-      "s3:PutBucketVersioning",
-      "s3:GetBucketPublicAccessBlock"
+      "s3:*"
     ]
     resources = [
       var.terraform_s3_state_arn
@@ -232,9 +214,7 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "iam:CreatePolicy",
-      "iam:GetPolicy",
-      "iam:GetPolicyVersion"
+      "iam:*",
     ]
     resources = [
       "*" # was aws_iam_role.github_actions_terraform 
@@ -272,9 +252,7 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "iam:CreatePolicy",
-      "iam:GetPolicy",
-      "iam:GetPolicyVersion"
+      "iam:*",
     ]
     resources = [
       var.lambda_role_policy_arn
