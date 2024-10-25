@@ -87,3 +87,7 @@ resource "aws_lambda_permission" "apigw_lambda" {
 
   source_arn = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current_account.account_id}:${var.api_id}/*/${var.api_http_method}${var.api_resource_path}"
 }
+
+resource "aws_cloudwatch_log_group" "lambda_log_group" {
+  name = "/aws/lambda/cloud-resume-lambda-function_${var.namespace}"
+}
