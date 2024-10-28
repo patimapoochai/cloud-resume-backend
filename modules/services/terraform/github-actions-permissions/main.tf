@@ -346,7 +346,7 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "logs:*"
     ]
     resources = [
-      "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/*"
+      "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/*:*"
     ]
     condition {
       test     = "StringEquals"
