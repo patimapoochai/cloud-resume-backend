@@ -14,7 +14,6 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "sts:GetCallerIdentity",
       "route53:ListHostedZones",
       "acm:ListCertificates",
-      "iam:GetPolicy",
     ]
     resources = [
       "*"
@@ -375,6 +374,19 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
     ]
     resources = [
       "*"
+    ]
+  }
+
+  statement {
+    sid = "ManagedIAMRole"
+    actions = [
+      "iam:GetPolicy",
+      "iam:GetPolicyVersion",
+      "iam:AttachRolePolicy",
+    ]
+    resources = [
+      "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+      "${var.lambda_role_arn}"
     ]
   }
 }
