@@ -1,5 +1,6 @@
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = var.s3_state_bucket_name
+  bucket        = var.s3_state_bucket_name
+  force_destroy = true # disable this in production
 
   lifecycle {
     # prevent_destroy = true # enable this in production
