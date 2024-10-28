@@ -354,6 +354,20 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       values   = ["Cloud-Resume-Backend"]
     }
   }
+
+  statement {
+    actions = [
+      "logs:*"
+    ]
+    resources = [
+      "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:*"
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/Project"
+      values   = ["Cloud-Resume-Backend"]
+    }
+  }
 }
 
 resource "aws_iam_policy" "github_actions_terraform" { # cycle here
