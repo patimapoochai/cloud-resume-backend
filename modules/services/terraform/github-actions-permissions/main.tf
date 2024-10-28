@@ -13,7 +13,8 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
     actions = [
       "sts:GetCallerIdentity",
       "route53:ListHostedZones",
-      "acm:ListCertificates"
+      "acm:ListCertificates",
+      "iam:GetPolicy",
     ]
     resources = [
       "*"
