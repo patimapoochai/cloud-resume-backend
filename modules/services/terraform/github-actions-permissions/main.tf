@@ -212,7 +212,14 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "iam:*",
+      "iam:Get*",
+      "iam:List*",
+      "iam:Create*",
+      "iam:Delete*",
+      "iam:Update*",
+      "iam:Attach*",
+      "iam:Tag*",
+      "iam:Untag*",
     ]
     resources = [
       "*" # was aws_iam_role.github_actions_terraform 
