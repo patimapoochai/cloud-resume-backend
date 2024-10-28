@@ -76,12 +76,12 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
   }
 
   statement {
-    sid = "CreateTerraformLockTable"
+    sid = "CreateDynamodbTable"
     actions = [
       "dynamodb:CreateTable"
     ]
     resources = [
-      "*"
+      "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:*"
     ]
   }
 
@@ -110,7 +110,7 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "apigateway:*"
     ]
     resources = [
-      "*"
+      "arn:aws:apigateway:${var.region}::*"
       #"arn:aws:apigateway:${var.region}::/domainnames",
       #"arn:aws:apigateway:${var.region}::/restapis"
     ]
@@ -142,7 +142,6 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "iam:CreateRole",
       "iam:GetRole",
       "iam:ListRolePolicies",
       "iam:ListAttachedRolePolicies",
@@ -150,7 +149,8 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "iam:TagRole"
     ]
     resources = [
-      "*" # was aws_iam_role.github_actions_terraform
+      # was aws_iam_role.github_actions_terraform
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:*"
     ]
     condition {
       test     = "StringEquals"
@@ -161,7 +161,6 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "iam:CreateRole",
       "iam:GetRole",
       "iam:ListRolePolicies",
       "iam:ListAttachedRolePolicies",
@@ -189,7 +188,6 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "dynamodb:CreateTable",
       "dynamodb:DescribeTable",
       "dynamodb:DescribeContinuousBackups",
       "dynamodb:DescribeTimeToLive",
@@ -348,7 +346,7 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "logs:*"
     ]
     resources = [
-      "arn:aws:logs:*:*:*"
+      "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/*"
     ]
     condition {
       test     = "StringEquals"
