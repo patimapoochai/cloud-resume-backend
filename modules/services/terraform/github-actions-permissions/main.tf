@@ -357,17 +357,17 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "logs:*"
+      "logs:Describe*",
+      "logs:List*",
+      "logs:Create*",
+      "logs:Delete*",
+      "logs:Update*",
+      "logs:Tag*",
+      "logs:Untag*",
     ]
     resources = [
-      "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:*",
-      "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/cloud-resume-lambda-function_1:log-stream:*"
+      "*"
     ]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceTag/Project"
-      values   = ["Cloud-Resume-Backend"]
-    }
   }
 }
 
