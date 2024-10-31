@@ -1,7 +1,6 @@
 describe('E2E website', () => {
   const apiUrl = "https://resumeapi.patimapoochai.net/visitor";
   it('can get visitor from API', () => {
-    cy.visit('http://localhost:3000');
     cy.request("POST",
       apiUrl)
       .then(res => {
@@ -12,7 +11,6 @@ describe('E2E website', () => {
 
   it('increments the visitor count each visit', () => {
     let visitorCount;
-    cy.visit('http://localhost:3000');
 
     cy.request("POST",
       apiUrl)
@@ -31,7 +29,6 @@ describe('E2E website', () => {
 
   it('remembers your IP address', () => {
     let uniqueVisitorCount;
-    cy.visit('http://localhost:3000');
 
     cy.request("POST",
       apiUrl,
@@ -53,8 +50,6 @@ describe('E2E website', () => {
   })
 
   it('rejects malformed POST requests', () => {
-    cy.visit('http://localhost:3000');
-
     cy.request({
       method: 'POST',
       url: apiUrl,
