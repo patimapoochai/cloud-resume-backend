@@ -1,24 +1,42 @@
 import boto3
-from boto3.dynamodb.conditions import Key, Attr
 import json
-import hashlib
-from datetime import datetime, timedelta
+from database_functions import GetRegularVisitorCount, GetUniqueVisitorCount
+   # HTTP body check
+   ## check if body is none, if it is, return an error response
+   ## check if body doesn't have exactly "queryType" property, return an error response
+   ## only if the request is valid, then call the ValidResponseHandlerFunction
+   #  if event['httpMethod'] == "POST": # or if event.httpMethod event exists
+   #     if event["body"] != None:
+   #        try: load json body's queryType
+   #        except: # no queryType property
+   #           return error response
+   #        if query == unique:
+   #           return unique visitor count
+   #        elif query == regular:
+   #           return regular visitor count
+   #        else: # query type is malformed
+   #           return error response
+   #     else: # is none
+   #     return error response
+   #  else:
+   #     return error response
+   
+   # Returning visitor values
+   ## should encapsulate the process of checking if item exists, if table initialized
+   ## return value should be designed based on the response generation
+   ## GetStat(visitorType) -> json {"VisitorCount": number}
+   
+   # DONE: handling response generation
+   ## i saw aws template function using a function to generate the response, maybe i should do that
+   ## I don't want to set status code, body, headers, error code from different places
+   ## I want to set them in one place, so its easier to read
+   ## CreateResponse(error, response, debug=False, debugMessage=Null) -> json {}
+   ## also debug and debugMessage kwargs that prints debugMessage if debug is True 
 
 def lambda_handler(event, context):
    key = "Visitors"
    attribute = "VisitorCount"
-   
-   
-   
-   status = 200
-   headers = {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'OPTIONS,POST',
-   }
    body = {}
-   
    
    match event['httpMethod']:
       case "POST":
@@ -33,103 +51,40 @@ def lambda_handler(event, context):
             try:
                query = json.loads(event["body"])["queryType"]
             except:
-               pass # this is where bad request body ends up
+               return respond("Bad request body")
             
             if query == "unique":
-               response = GetUniqueVisitorCount(
+               body = GetUniqueVisitorCount(
                   event["headers"]["X-Forwarded-For"], # fix this line to handle when there's no X-Forwarded-For header
                   stat_table,
                   cache_table)
-               body = { "UniqueVisitors": str(response["VisitorCount"]) }
             else:
-               status = 400
-               body = {"error": "Bad request body"}
+               return respond("Bad queryType parameter")
                
-         else: # get regular visitor count
-            # check if "Visitors" exists
-            body = CheckItemExists(stat_table, "Stat", "Visitors")
-            if body == None: #  initialize stat
-               InitStat(stat_table, "Visitors", "VisitorCount", 1)
-               response = GetStat(stat_table, "Visitors", "VisitorCount")["VisitorCount"]
-               body = { f"{attribute}": str(response) }
-            else:
-               response =  IncrementStat(
-                  stat_table, key, attribute)["Attributes"]["VisitorCount"]
-               body = { f"{attribute}": str(response) }
+         else:
+            body = GetRegularVisitorCount(stat_table, key, attribute)
       case _:
-         status = 400
-         body = {"error": "Unsupported HTTP method"}
-      
+         return respond("Unsupported HTTP method")
+   
+   return respond(None, body)
+
+def GetNamespace(functionName):
+   return functionName.split("_")[1]
+
+def respond(errMessage, res=None, debugMessage=None):
+   body = debugMessage if debugMessage else json.dumps(res)
    return {
-      'statusCode': status,
-      'headers': headers,
-      #'body': body, #debug
-      'body': json.dumps(body),
+      'statusCode': 400 if errMessage else 200,
+      'body': errMessage if errMessage else body,
+      'headers': {
+         'Content-Type': 'application/json',
+         'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+         'Access-Control-Allow-Origin': '*',
+         'Access-Control-Allow-Methods': 'OPTIONS,POST',
+      },
    }
-   
-def CheckItemExists(table, primary_key_name, primary_key_value):
-    response = table.query(
-        KeyConditionExpression=Key(primary_key_name).eq(primary_key_value)
-    )['Items']
-    return response if response else None
-    
-def GetExpirationTime(expired_in_days):
-   return int((datetime.now() + timedelta(days=expired_in_days)).timestamp())
-   
-def GetNamespace(string):
-    return string.split("_")[1]
 
-def GetStat(table, key, attribute):
-   item = {}
-   try:
-      item = table.get_item(Key={"Stat": key}, AttributesToGet=[attribute])["Item"]
-   except KeyError:
-      InitStat(table, key, attribute)
-      item = table.get_item(Key={"Stat": key}, AttributesToGet=[attribute])["Item"]
-   return item
-   
-def GetUniqueVisitorCount(user_ip, stat_table, cache_table):
-   user_ip_hash = HashIP(user_ip)
-   
-   # check if user IP is in the cache table
-   user = CheckItemExists(cache_table, "UserID", user_ip_hash)
-   
-   result = {}
-   
-   if user:
-    # if user is in the IP cache table don't do anything, and return current stat
-      result = CheckItemExists(stat_table, "Stat", "UniqueVisitors")
-      if result == None:
-         InitStat(stat_table, "UniqueVisitors", "VisitorCount", 1)
-         result = GetStat(stat_table, "UniqueVisitors", "VisitorCount")
-      else:
-         result = result[0]
-   else:
-      # else add the IP hash to the table
-      cache_table.put_item(Item={"UserID": user_ip_hash, "TTL": GetExpirationTime(7)})
-      # and increment unique visitor count
-      item = CheckItemExists(stat_table, "Stat", "UniqueVisitors")
-      if item == None:
-         # if Unique Visitors stat not initialized, put UniqueVisitors in there
-         InitStat(stat_table, "UniqueVisitors", "VisitorCount")
-      result = IncrementStat(
-         stat_table, "UniqueVisitors", "VisitorCount")["Attributes"] # update the table if the row is there
-   return result
 
-   
-def HashIP(user_ip_string):
-    hasher = hashlib.sha256()
-    user_ip = bytearray(user_ip_string, 'utf-8')
-    hasher.update(user_ip)
-    return hasher.hexdigest()
-   
-def InitStat(table, key, attribute, initialValue=0):
-    return table.put_item(Item={"Stat": key, f"{attribute}": initialValue})
-   
-def IncrementStat(table, key, attribute):
-   return table.update_item(Key={ "Stat": key },
-      UpdateExpression=f"set {attribute} = {attribute} + :val",
-      ExpressionAttributeValues={ ":val": 1 },
-      ReturnValues="ALL_NEW")
+
 
 

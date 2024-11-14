@@ -83,6 +83,8 @@ resource "aws_lambda_function" "lambda_function" {
   runtime  = "python3.12"
   filename = var.code_filename
 
+  timeout = 5
+
   tags = {
     TestTag = "Active"
   }

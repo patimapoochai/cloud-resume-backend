@@ -1,3 +1,7 @@
+// TODO: tests to write
+// - can the api endpoint handles when there is no X-Forwarded-For header? (is this needed?)
+//
+
 describe('E2E website', () => {
   const apiUrl = "https://resumeapi.patimapoochai.net/visitor";
   it('can get visitor from API', () => {
