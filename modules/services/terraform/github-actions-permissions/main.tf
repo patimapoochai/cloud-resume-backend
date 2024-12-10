@@ -54,7 +54,6 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "acm:ListTagsForCertificate"
     ]
     resources = [
-      # "arn:aws:acm:us-east-1:879381244858:certificate/*"
       "arn:aws:acm:${var.region}:${data.aws_caller_identity.current.account_id}:certificate/*"
     ]
   }
@@ -222,7 +221,8 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "iam:Untag*",
     ]
     resources = [
-      "*" # was aws_iam_role.github_actions_terraform 
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/*"
+      # "*" # change this to arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/*
     ]
     condition {
       test     = "StringEquals"
@@ -329,15 +329,6 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       values   = ["Cloud-Resume-Backend"]
     }
   }
-
-  # statement {
-  #   actions = [
-  #     "route53:GetChange"
-  #   ]
-  #   resources = [
-  #     "arn:aws:route53:::change/C06843121UC52O6A6QE4V" # WTF is this?
-  #   ]
-  # }
 
   statement {
     actions = [
