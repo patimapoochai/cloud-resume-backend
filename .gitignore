@@ -40,3 +40,4 @@ terraform.rc
 out
 # local debug folder
 debug-stuff
+tests/cypress/screenshots/

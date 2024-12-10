@@ -40,7 +40,7 @@ describe('E2E website', () => {
     )
       .then(res => {
         console.log(res);
-        uniqueVisitorCount = +res.body.UniqueVisitors;
+        uniqueVisitorCount = +res.body.VisitorCount;
       });
 
     cy.request("POST",
@@ -48,7 +48,7 @@ describe('E2E website', () => {
       { "queryType": "unique" }
     )
       .then(res => {
-        expect(res.body.UniqueVisitors == uniqueVisitorCount, 'Visitor count isn\'t more than previous value')
+        expect(res.body.VisitorCount == uniqueVisitorCount, 'Visitor count isn\'t more than previous value')
           .to.eq(true);
       });
   })
