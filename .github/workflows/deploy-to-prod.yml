@@ -45,6 +45,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Initialize npm
-        run: npm install
+        run: npm install cypress --force
       - name: Run tets
         run: npm run e2e:firefox
